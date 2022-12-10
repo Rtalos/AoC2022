@@ -7,9 +7,8 @@ public static class Peeper
 {
     public static int CountTrees(int[,] forest)
     {
-        var visibleTrees = 0;
+        //height is the same with this grid
         var width = forest.GetLength(0);
-        var height = forest.GetLength(1);
 
         var rows = new List<IEnumerable<(int, int, int)>>();
         var columns = new List<IEnumerable<(int, int, int)>>();
@@ -21,8 +20,6 @@ public static class Peeper
         }
 
         var trees = new List<Tree>();
-        var a = trees.OrderBy(x => x.Index).Select(y => y.Index);
-        var b = trees.Where(x => x.Visible);
 
         IterateCollections(rows, trees);
         IterateCollections(rows, trees, Direction.Reverse);
@@ -50,9 +47,7 @@ public static class Peeper
             Console.Write(Environment.NewLine);
         }
 
-        Console.WriteLine(b.Count());
-
-        return visibleTrees;
+        return trees.Where(x => x.Visible).Count();
     }
 
     private static void IterateCollections(List<IEnumerable<(int x, int y, int height)>> collection, List<Tree> trees, Direction direction = Direction.Forward)
@@ -70,13 +65,7 @@ public static class Peeper
             {
                 var tree = !trees.Any(x => x.Index == (tuple.x, tuple.y)) ? CreateTree(trees, tuple) : trees.First(x => x.Index == (tuple.x, tuple.y));
 
-                if (trees.Any(x => x.Index == (tuple.x, tuple.y) && x.Visible))
-                {
-                    highestTree = tuple.height;
-                    continue;
-                }
-                    
-                if (tuple.height > highestTree || (tuple.y == 0 || tuple.x == 0))
+                if (tuple.height > highestTree || (tuple.y == 0 || tuple.x == 0) || (tuple.y == (collection.Count - 1) || tuple.x == (collection.Count - 1)))
                 {
                     tree.Visible = true;
                     highestTree = tuple.height;
@@ -89,7 +78,6 @@ public static class Peeper
     {
         var tree = new Tree();
         tree.Height = tuple.height;
-        tree.Visited = true;
         tree.Index = (tuple.x, tuple.y);
         trees.Add(tree);
         return tree;

@@ -10,7 +10,6 @@ namespace AoC2022_Day8
     {
         public int Height { get; set; }
         public bool Visible { get; set; }
-        public bool Visited { get; set; }
         public (int x, int y) Index { get; set; }
     }
 }
