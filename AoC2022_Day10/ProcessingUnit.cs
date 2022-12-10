@@ -24,6 +24,7 @@ namespace AoC2022_Day10
                 ThresholdRanges.Add(Tick, ProcessedAddXOperations.ToList());
             }
         }
+
         public (bool reached, int threshold) InternalThreshold(int tick) => tick switch
         {
             20 => (true, 20),
@@ -34,6 +35,7 @@ namespace AoC2022_Day10
             220 => (true, 20),
             _ => (false, 0)
         };
+
         public ProcessingUnit Process(string[] input)
         {
             foreach (var line in input)
@@ -58,6 +60,7 @@ namespace AoC2022_Day10
             }
             return this;
         }
+
         public int CalculateThresholdRange()
         {
             //TODO see if LINQ can solve this
