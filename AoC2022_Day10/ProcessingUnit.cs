@@ -16,28 +16,10 @@ namespace AoC2022_Day10
             ProcessedAddXOperations.Add(1);
         }
         public int Tick { get; set; }
-        public void CheckForSignalThreshold()
-        {
-            if (InternalThreshold(Tick).reached)
-            {
-                //Pass new list and not ref to keep range
-                ThresholdRanges.Add(Tick, ProcessedAddXOperations.ToList());
-            }
-        }
-
-        public (bool reached, int threshold) InternalThreshold(int tick) => tick switch
-        {
-            20 => (true, 20),
-            60 => (true, 20),
-            100 => (true, 20),
-            140 => (true, 20),
-            180 => (true, 20),
-            220 => (true, 20),
-            _ => (false, 0)
-        };
 
         public ProcessingUnit Process(string[] input)
         {
+            //TODO see to possibly better this
             foreach (var line in input)
             {
                 var splitInstruction = StringHelper.Split(line);
@@ -71,5 +53,25 @@ namespace AoC2022_Day10
             }
             return total;
         }
+
+        private void CheckForSignalThreshold()
+        {
+            if (InternalThreshold(Tick).reached)
+            {
+                //Pass new list and not ref to keep range
+                ThresholdRanges.Add(Tick, ProcessedAddXOperations.ToList());
+            }
+        }
+
+        private (bool reached, int threshold) InternalThreshold(int tick) => tick switch
+        {
+            20 => (true, 20),
+            60 => (true, 20),
+            100 => (true, 20),
+            140 => (true, 20),
+            180 => (true, 20),
+            220 => (true, 20),
+            _ => (false, 0)
+        };
     }
 }
