@@ -4,4 +4,10 @@ var input = File.ReadAllLines(@"input.txt");
 
 var processingUnit = new ProcessingUnit();
 
-Console.WriteLine(processingUnit.Process(input).CalculateThresholdRange());
+foreach (var pixel in processingUnit.Process(input).StartPrinting())
+{
+    Console.Write(pixel);
+}
+
+
+
