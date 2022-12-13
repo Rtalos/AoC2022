@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using static AoC2022_Day8.Enums;
-
-namespace AoC2022_Day8;
+﻿namespace AoC2022_Day8;
 
 public static class Peeper
 {
@@ -10,23 +7,33 @@ public static class Peeper
         //height is the same with this grid
         var width = forest.GetLength(0);
 
-        var rows = new List<IEnumerable<(int, int, int)>>();
-        var columns = new List<IEnumerable<(int, int, int)>>();
+        var visibleTrees = new List<(int x, int y, bool visible)>();
 
-        for (int i = 0; i < width; i++)
+        var allRows = GetAllRowsAndIndices2(forest);
+        var allColumns = GetAllColumnsAndIndices2(forest);
+
+        visibleTrees.AddRange(FindVisibleTrees(allRows, width));
+        visibleTrees.AddRange(FindVisibleTrees(allRows.Reverse(), width));
+        visibleTrees.AddRange(FindVisibleTrees(allColumns, width));
+        visibleTrees.AddRange(FindVisibleTrees(allColumns.Reverse(), width));
+
+        //var a = FindNeighbours(allRows, width);
+
+        //VisualDebugging(forest, visibleTrees);
+
+        return visibleTrees.Distinct().Count();
+    }
+
+    private static void VisualDebugging(int[,] forest, IEnumerable<(int x, int y, bool visible)> visibleTrees)
+    {
+        var trees = Generate.ForestYield().ToList();
+
+        foreach (var visibleTree in visibleTrees)
         {
-            rows.Add(GetRowAndIndices(forest, i));
-            columns.Add(GetColumnAndIndices(forest, i));
+            trees.First(t => t.Index == (visibleTree.x, visibleTree.y)).Visible = true;
         }
 
-        var trees = new List<Tree>();
-
-        IterateCollections(rows, trees);
-        IterateCollections(rows, trees, Direction.Reverse);
-        IterateCollections(columns, trees);
-        IterateCollections(columns, trees, Direction.Reverse);
-
-
+        // Visual debugging tool
         for (int x = 0; x < forest.GetLength(0); x++)
         {
             for (int y = 0; y < forest.GetLength(1); y++)
@@ -46,76 +53,105 @@ public static class Peeper
 
             Console.Write(Environment.NewLine);
         }
-
-        return trees.Where(x => x.Visible).Count();
     }
 
-    private static void IterateCollections(List<IEnumerable<(int x, int y, int height)>> collection, List<Tree> trees, Direction direction = Direction.Forward)
+    private static IEnumerable<(int x, int y, bool visible)> FindVisibleTrees(IEnumerable<(int x, int y, int height)> collection, int gridMax)
     {
-        foreach (var item in collection)
+        var highestTree = 0;
+
+        foreach (var tuple in collection)
         {
-            var placeholderlist = new List<(int x, int y, int height)>();
-            placeholderlist.AddRange(item);
-            if (direction == Direction.Reverse)
-                placeholderlist.Reverse();
-
-            var highestTree = 0;
-
-            foreach (var tuple in placeholderlist)
+            if (tuple.height > highestTree || (tuple.y == 0 || tuple.x == 0) || (tuple.y == (gridMax - 1) || tuple.x == (gridMax - 1)))
             {
-                var tree = !trees.Any(x => x.Index == (tuple.x, tuple.y)) ? CreateTree(trees, tuple) : trees.First(x => x.Index == (tuple.x, tuple.y));
-
-                if (tuple.height > highestTree || (tuple.y == 0 || tuple.x == 0) || (tuple.y == (collection.Count - 1) || tuple.x == (collection.Count - 1)))
-                {
-                    tree.Visible = true;
-                    highestTree = tuple.height;
-                }
+                highestTree = tuple.height;
+                yield return (tuple.x, tuple.y, true);
             }
         }
     }
 
-    private static Tree CreateTree(List<Tree> trees, (int x, int y, int height) tuple)
+    //Experimental ==NOT WORKING==
+    private static IEnumerable<(int x, int y, List<int> neighbours)> FindNeighbours(IEnumerable<(int x, int y, int height)> collection, int gridMax)
     {
-        var tree = new Tree();
-        tree.Height = tuple.height;
-        tree.Index = (tuple.x, tuple.y);
-        trees.Add(tree);
-        return tree;
-    }
+        var highestTree = 0;
+        var internalMax = gridMax;
+        var intlist = new List<int>();
+        var list = new List<(int x, int y, List<int> neighbours)>();
 
-    private static List<int> GetColumn(int[,] matrix, int columnNumber)
-    {
-        return Enumerable.Range(0, matrix.GetLength(0))
-                .Select(x => matrix[x, columnNumber])
-                .ToList();
-    }
+        foreach (var tuple in collection)
+        {
+            internalMax--;
 
+            if (tuple.height >= highestTree || (tuple.y == 0 || tuple.x == 0) || (tuple.y == (gridMax - 1) || tuple.x == (gridMax - 1)))
+            {
+                var previousNeighbourHeight = 0;
+                var range = collection.Take(internalMax).ToList();
 
-    private static List<int> GetRow(int[,] matrix, int rowNumber)
-    {
-        return Enumerable.Range(0, matrix.GetLength(1))
-                .Select(x => matrix[rowNumber, x])
-                .ToList();
+                foreach (var neighbours in range)
+                {
+                    if (neighbours.height >= tuple.height)
+                    {
+                        previousNeighbourHeight = neighbours.height;
+                        intlist.Add(1);
+                    }
+                }
+            }
+
+            list.Add((tuple.x, tuple.y, intlist));
+            intlist.Clear();
+        }
+
+        return list;
     }
 
     private static IEnumerable<(int x, int y, int height)> GetColumnAndIndices(int[,] matrix, int columnNumber)
     {
         return Enumerable.Range(0, matrix.GetLength(0))
-                                               .Select(x => (x, columnNumber, matrix[x, columnNumber]));
-     
+                         .Select(x => (x, columnNumber, matrix[x, columnNumber]));
+
     }
 
     private static IEnumerable<(int x, int y, int height)> GetRowAndIndices(int[,] matrix, int rowNumber)
     {
         return Enumerable.Range(0, matrix.GetLength(1))
-                .Select(x => (rowNumber, x, matrix[rowNumber, x]));
+                         .Select(x => (rowNumber, x, matrix[rowNumber, x]));
     }
 
-    private enum Direction
+    private static IEnumerable<(int x, int y, int height)> GetAllRowsAndIndices2(int[,] matrix)
     {
-        Forward,
-        Reverse
+        for (int x = 0; x < matrix.GetLength(0); x++)
+        {
+            for (int y = 0; y < matrix.GetLength(1); y++)
+            {
+                yield return (x, y, matrix[x, y]);
+            }
+        }
     }
+
+    private static IEnumerable<(int x, int y, int height)> GetAllColumnsAndIndices2(int[,] matrix)
+    {
+        for (int y = 0; y < matrix.GetLength(0); y++)
+        {
+            for (int x = 0; x < matrix.GetLength(1); x++)
+            {
+                yield return (x, y, matrix[x, y]);
+            }
+        }
+    }
+
+    //private static List<int> GetColumn(int[,] matrix, int columnNumber)
+    //{
+    //    return Enumerable.Range(0, matrix.GetLength(0))
+    //            .Select(x => matrix[x, columnNumber])
+    //            .ToList();
+    //}
+
+
+    //private static List<int> GetRow(int[,] matrix, int rowNumber)
+    //{
+    //    return Enumerable.Range(0, matrix.GetLength(1))
+    //            .Select(x => matrix[rowNumber, x])
+    //            .ToList();
+    //}
 }
 
 

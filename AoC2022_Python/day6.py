@@ -1,5 +1,4 @@
 file = open("input.txt", "r")
-
 chars = [*file.readline()]
 
 skip = 0

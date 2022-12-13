@@ -1,15 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace AoC2022_Day8;
 
-namespace AoC2022_Day8
+public class Tree
 {
-    public class Tree
+    private int height;
+    private bool visible;
+    private (int x, int y) index;
+
+    public Tree((int x, int y) index, int heiglht)
     {
-        public int Height { get; set; }
-        public bool Visible { get; set; }
-        public (int x, int y) Index { get; set; }
+        this.height = heiglht;
+        this.index = index;
     }
+
+    public int Height { get => height; set => height = value; }
+    public bool Visible { get => visible; set => visible = value; }
+    public (int x, int y) Index { get => index; set => index = value; }
 }
