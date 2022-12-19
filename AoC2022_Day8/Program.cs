@@ -7,9 +7,10 @@ var stopWatch = Stopwatch.StartNew();
 
 var forest = Generate.Forest(input);
 
-var count = Peeper.CountTrees(forest);
+var count = Counter.CountTrees(forest);
 
 stopWatch.Stop();
 
-Console.WriteLine(count);
+Console.WriteLine($"Visible trees: {count.visibleTrees}");
+Console.WriteLine($"Scenery score: {count.sceneryScore}");
 Console.WriteLine($"Time to run all: {stopWatch.Elapsed.Milliseconds} ms");
