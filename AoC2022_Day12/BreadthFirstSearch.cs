@@ -2,15 +2,16 @@
 
 public static class BreadthFirstSearch
 {
-    public static Stack<Vertex<char>> Search(List<Vertex<char>> vertices)
+    public static Stack<Vertex<char>> Search(List<Vertex<char>> vertices, Vertex<char> startVertex)
     {
         Queue<Vertex<char>> queue = new Queue<Vertex<char>>();
 
-        var startVertex = vertices.First(v => v.Data == 'S');
-        startVertex.Start = 'S';
-        startVertex.Data = 'a';
-
-
+        if (startVertex.Data == 'S')
+        {
+            startVertex.Start = 'S';
+            startVertex.Data = 'a';
+        }
+ 
         var endVertex = vertices.First(v => v.Data == 'E');
         endVertex.Data = 'z';
         endVertex.End = 'E';
