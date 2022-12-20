@@ -9,22 +9,23 @@ var shortestPath = BreadthFirstSearch.Search(vertices.ToList(), vertices.First(v
 
 Console.WriteLine(shortestPath.Count());
 
-//Rough P2, needs optimization
-var stackPathP2 = new List<Stack<Vertex<char>>>();
+//Small optimization, could need redesign for P2
+var stackPathP2 = new List<int>();
 var verticesP2 = vertices.Where(v => v.Data == 'a');
-foreach (var vertex in verticesP2)
+
+Parallel.ForEach(verticesP2, vertex =>
 {
-    var shortestPathP2 = BreadthFirstSearch.Search(vertices.ToList(), vertex);
+    var shortestPathP2 = BreadthFirstSearch.SearchSimplified(vertices.ToList(), vertex);
     stackPathP2.Add(shortestPathP2);
-}
+});
 
-stackPathP2.RemoveAll(x => x.Count == 0);
+stackPathP2.RemoveAll(x => x == 0);
 
-var b = stackPathP2.MinBy(x => x.Count);
+var minimumNoOfVertices = stackPathP2.MinBy(x => x);
 
 stopwatch.Stop();
 
-Console.WriteLine(b.Count);
+Console.WriteLine(minimumNoOfVertices);
 Console.WriteLine($"{stopwatch.Elapsed.Milliseconds} ms");
 
 //Work in progress to get visualization oging
