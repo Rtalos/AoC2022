@@ -2,31 +2,33 @@
 
 public static class BreadthFirstSearch
 {
-    public static Stack<Vertex<char>> Search(List<Vertex<char>> vertices, Vertex<char> startVertex)
+    public static Stack<Vertex<char>> SearchAscend(List<Vertex<char>> vertices, char start, char end)
     {
-        Queue<Vertex<char>> queue = new Queue<Vertex<char>>();
+        return Search(vertices, start, end, Order.Ascending);
+    }
 
-        if (startVertex.Data == 'S')
-        {
-            startVertex.Start = 'S';
-            startVertex.Data = 'a';
-        }
- 
-        var endVertex = vertices.First(v => v.Data == 'E');
-        endVertex.Data = 'z';
-        endVertex.End = 'E';
+    public static Stack<Vertex<char>> SearchDescend(List<Vertex<char>> vertices, char start, char end)
+    {
+        return Search(vertices, start, end, Order.Descending);
+    }
+
+    private static Stack<Vertex<char>> Search(List<Vertex<char>> vertices, char start, char end, Order order)
+    {
+        var queue = new Queue<Vertex<char>>();
+
+        var startVertex = vertices.First(v => v.Data == start);
 
         queue.Enqueue(startVertex);
 
         startVertex.Visit();
 
-        while (queue.Count > 0)
+        while (queue.Any())
         {
             var currentVertex = queue.Dequeue();
 
-            if (currentVertex.Equals(endVertex))
+            if (currentVertex.Data == end)
             {
-                var fullPath = BacktrackFullPathInformation(startVertex, currentVertex);
+                var fullPath = BacktrackPath(startVertex, currentVertex);
                 return fullPath;
             }
 
@@ -35,66 +37,22 @@ public static class BreadthFirstSearch
             var topNeighbour = vertices.FirstOrDefault(v => v.Index == (currentVertex.Index.row - 1, currentVertex.Index.column));
             var bottomNeighbour = vertices.FirstOrDefault(v => v.Index == (currentVertex.Index.row + 1, currentVertex.Index.column));
 
-            ApplyConditions(queue, currentVertex, leftNeighbour);
-            ApplyConditions(queue, currentVertex, rightNeighbour);
-            ApplyConditions(queue, currentVertex, topNeighbour);
-            ApplyConditions(queue, currentVertex, bottomNeighbour);
+            ApplyConditions(queue, currentVertex, leftNeighbour, order);
+            ApplyConditions(queue, currentVertex, rightNeighbour, order);
+            ApplyConditions(queue, currentVertex, topNeighbour, order);
+            ApplyConditions(queue, currentVertex, bottomNeighbour, order);
         }
 
         return new Stack<Vertex<char>>();
     }
 
-    public static int SearchSimplified(List<Vertex<char>> vertices, Vertex<char> startVertex)
-    {
-        Queue<Vertex<char>> queue = new Queue<Vertex<char>>();
-
-        if (startVertex.Data == 'S')
-        {
-            startVertex.Start = 'S';
-            startVertex.Data = 'a';
-        }
-
-        var endVertex = vertices.First(v => v.Data == 'E');
-        endVertex.Data = 'z';
-        endVertex.End = 'E';
-
-        queue.Enqueue(startVertex);
-
-        startVertex.Visit();
-
-        while (queue.Count > 0)
-        {
-            var currentVertex = queue.Dequeue();
-
-            if (currentVertex.Equals(endVertex))
-            {
-                var numberOfVerticesInPath = BacktrackSimplified(startVertex, currentVertex);
-                return numberOfVerticesInPath;
-            }
-
-            var leftNeighbour = vertices.FirstOrDefault(v => v.Index == (currentVertex.Index.row, currentVertex.Index.column - 1));
-            var rightNeighbour = vertices.FirstOrDefault(v => v.Index == (currentVertex.Index.row, currentVertex.Index.column + 1));
-            var topNeighbour = vertices.FirstOrDefault(v => v.Index == (currentVertex.Index.row - 1, currentVertex.Index.column));
-            var bottomNeighbour = vertices.FirstOrDefault(v => v.Index == (currentVertex.Index.row + 1, currentVertex.Index.column));
-
-            ApplyConditions(queue, currentVertex, leftNeighbour);
-            ApplyConditions(queue, currentVertex, rightNeighbour);
-            ApplyConditions(queue, currentVertex, topNeighbour);
-            ApplyConditions(queue, currentVertex, bottomNeighbour);
-        }
-
-        return 0;
-    }
-
-    private static void ApplyConditions(Queue<Vertex<char>> queue, Vertex<char> currentVertex, Vertex<char>? vertex)
+    private static void ApplyConditions(Queue<Vertex<char>> queue, Vertex<char> currentVertex, Vertex<char>? vertex, Order order)
     {
         if (vertex != null && !vertex.Visited)
         {
             //currentVertex.Neighbours.Add(vertex);
 
-            if (currentVertex.Data == vertex.Data
-                || currentVertex.Data + 1 == vertex.Data
-                || currentVertex.Data > vertex.Data)
+            if (Condition(order, currentVertex, vertex))
             {
                 vertex.Visit();
                 vertex.ParentVertex = currentVertex;
@@ -103,7 +61,17 @@ public static class BreadthFirstSearch
         }
     }
 
-    private static Stack<Vertex<char>> BacktrackFullPathInformation(Vertex<char> startVertex, Vertex<char> endVertex)
+    private static bool Condition(Order order, Vertex<char> currentVertex, Vertex<char> vertex) => order switch
+    {
+        Order.Ascending => (vertex.Data == 'E' 
+                            || currentVertex.Data == 'S'
+                            || currentVertex.Data + 1 >= vertex.Data),
+        Order.Descending => (vertex.Data == 'S'
+                            || currentVertex.Data - 1 <= vertex.Data),
+        _ => false
+    };
+
+    private static Stack<Vertex<char>> BacktrackPath(Vertex<char> startVertex, Vertex<char> endVertex)
     {
         var path = new Stack<Vertex<char>>();
 
@@ -120,21 +88,10 @@ public static class BreadthFirstSearch
         return path;
     }
 
-    private static int BacktrackSimplified(Vertex<char> startVertex, Vertex<char> endVertex)
+    private enum Order
     {
-        var counter = 0;
-
-        var currentVertex = endVertex;
-
-        counter++;
-
-        while (currentVertex!.ParentVertex != startVertex)
-        {
-            counter++;
-            currentVertex = currentVertex.ParentVertex;
-        }
-
-        return counter;
+        Ascending,
+        Descending
     }
 }
 

@@ -5,34 +5,12 @@ var stopwatch = Stopwatch.StartNew();
 
 var vertices = Generator.CreateVertices();
 
-var shortestPath = BreadthFirstSearch.Search(vertices.ToList(), vertices.First(v => v.Data == 'S'));
+var shortestPathAscending = BreadthFirstSearch.SearchAscend(vertices.ToList(), 'S', 'E');
+var shortestPathDescending = BreadthFirstSearch.SearchDescend(vertices.ToList(), 'E', 'a');
 
-Console.WriteLine(shortestPath.Count());
-
-//Small optimization, could need redesign for P2
-var stackPathP2 = new List<int>();
-var verticesP2 = vertices.Where(v => v.Data == 'a');
-
-Parallel.ForEach(verticesP2, vertex =>
-{
-    var shortestPathP2 = BreadthFirstSearch.SearchSimplified(vertices.ToList(), vertex);
-    stackPathP2.Add(shortestPathP2);
-});
-
-stackPathP2.RemoveAll(x => x == 0);
-
-var minimumNoOfVertices = stackPathP2.MinBy(x => x);
+Console.WriteLine(shortestPathAscending.Count());
+Console.WriteLine(shortestPathDescending.Count());
 
 stopwatch.Stop();
 
-Console.WriteLine(minimumNoOfVertices);
 Console.WriteLine($"{stopwatch.Elapsed.Milliseconds} ms");
-
-//Work in progress to get visualization oging
-//CreateHeightMap(shortestPath);
-
-//foreach (var item in shortestPath)
-//{
-//    Console.WriteLine($"Index: {item.Index} - {item.Data}");
-//}
-
