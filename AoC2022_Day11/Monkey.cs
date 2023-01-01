@@ -1,7 +1,7 @@
 ﻿public class Monkey
 {
     public int Number { get; set; }
-    public int Inspection { get; set; }
+    public long Inspection { get; set; }
     public Queue<long> StartingItems { get; set; } = new Queue<long>();
     public Func<long, long> Operation { get; set; }
     public int Test { get; set; }
@@ -13,16 +13,16 @@
         Number = number;
     }
 
-    public void PerformOperation()
+    public void PerformOperation(long lcm = 0)
     {
         while (StartingItems.Any())
         {
             var item = StartingItems.Dequeue();
             var worryLevel = Operation(item);
-            var divisedWorryLevel = (long)Math.Floor(worryLevel / 3d);
-            var list = new List<long> { divisedWorryLevel };
+            worryLevel = lcm == 0 ? (long)Math.Floor(worryLevel / 3d) : worryLevel % lcm;
+            var list = new List<long> { worryLevel };
 
-            if (divisedWorryLevel % Test == 0)
+            if (worryLevel % Test == 0)
             {
                 Monkey1.AddItems(list);
             }

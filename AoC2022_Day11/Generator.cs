@@ -23,7 +23,7 @@ public static class Generator
                     {
                         var items = StringHelper.Split(instruction.TrimStart(' ')).Skip(2).ToArray();
 
-                        var a = Enumerable.Range(0, items.Count()).Select((v, i) => (long)int.Parse(items[i].Trim(',')));
+                        var a = Enumerable.Range(0, items.Count()).Select((v, i) => long.Parse(items[i].Trim(',')));
 
                         monkey.AddItems(a);
                     }
